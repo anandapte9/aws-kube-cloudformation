@@ -1,0 +1,34 @@
+[
+  {
+    "ParameterKey": "VPCCIDR",
+    "ParameterValue": "10.0.0.0/16"
+  },
+  {
+    "ParameterKey": "Environment",
+    "ParameterValue": "KUBE"
+  },
+  {
+    "ParameterKey": "InstanceType",
+    "ParameterValue": "t2.micro"
+  },
+  {
+    "ParameterKey": "PublicSubnetCIDR",
+    "ParameterValue": "10.0.96.0/27, 10.0.96.32/27, 10.0.96.64/27"
+  },
+  {
+    "ParameterKey": "PrivateSubnetCIDR",
+    "ParameterValue": "10.0.0.0/19, 10.0.32.0/19, 10.0.64.0/19"
+  },
+  {
+    "ParameterKey": "azones",
+    "ParameterValue": "ap-southeast-2a, ap-southeast-2b, ap-southeast-2c"
+  },
+  {
+    "ParameterKey": "S3Bucket",
+    "ParameterValue": "aa-cf-bucket"
+  },
+  {
+    "ParameterKey": "S3Key",
+    "ParameterValue": "amilookup.zip"
+  }
+]

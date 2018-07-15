@@ -1,0 +1,602 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: A sample kubernetes template
+# Parameter section
+Parameters:
+  InstanceType:
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+      - m1.small
+      - m1.large
+    Description: Enter t2.micro, m1.small or m1.large. Default t2.micro.
+  Environment:
+    Type: String
+    Description: Enter the environment name.
+  VPCCIDR:
+    Type: String
+  azones:
+    Type: CommaDelimitedList
+  PublicSubnetCIDR:
+    Type: CommaDelimitedList
+  PrivateSubnetCIDR:
+    Type: CommaDelimitedList
+  S3Bucket:
+    Type: String
+  S3Key:
+    Type: String
+Mappings:
+  AWSInstanceType2Arch:
+    t2.micro:
+      Arch: HVM64
+    m1.small:
+      Arch: PV64
+    m1.large:
+      Arch: PV64
+# Resources section
+Resources:
+  # Networking Resources - VPC, subnets, Internet Gateway, Nat Gateway, Route tables, Security groups and associations.
+  KubeVpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VPCCIDR
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+              - '-'
+              - - !Ref Environment
+                - 'vpc'
+        - Key: Environment
+          Value: !Ref Environment
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select [ 0, !Ref azones ]
+      CidrBlock: !Select [ 0, !Ref PublicSubnetCIDR ]
+      MapPublicIpOnLaunch: True
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+              - '-'
+              - - !Ref Environment
+                - 'public subnet 1'
+        - Key: Environment
+          Value: !Ref Environment
+      VpcId: !Ref KubeVpc
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select [ 1, !Ref azones ]
+      CidrBlock: !Select [ 1, !Ref PublicSubnetCIDR ]
+      MapPublicIpOnLaunch: True
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+              - '-'
+              - - !Ref Environment
+                - 'public subnet 2'
+        - Key: Environment
+          Value: !Ref Environment
+      VpcId: !Ref KubeVpc
+  PublicSubnet3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select [ 2, !Ref azones ]
+      CidrBlock: !Select [ 2, !Ref PublicSubnetCIDR ]
+      MapPublicIpOnLaunch: True
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+              - '-'
+              - - !Ref Environment
+                - 'public subnet 3'
+        - Key: Environment
+          Value: !Ref Environment
+      VpcId: !Ref KubeVpc
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select [ 0, !Ref azones ]
+      CidrBlock: !Select [ 0, !Ref PrivateSubnetCIDR ]
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+              - '-'
+              - - !Ref Environment
+                - 'private subnet 1'
+        - Key: Environment
+          Value: !Ref Environment
+      VpcId: !Ref KubeVpc
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select [ 1, !Ref azones ]
+      CidrBlock: !Select [ 1, !Ref PrivateSubnetCIDR ]
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+              - '-'
+              - - !Ref Environment
+                - 'private subnet 2'
+        - Key: Environment
+          Value: !Ref Environment
+      VpcId: !Ref KubeVpc
+  PrivateSubnet3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select [ 2, !Ref azones ]
+      CidrBlock: !Select [ 2, !Ref PrivateSubnetCIDR ]
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+              - '-'
+              - - !Ref Environment
+                - 'private subnet 3'
+        - Key: Environment
+          Value: !Ref Environment
+      VpcId: !Ref KubeVpc
+  NatEip:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+  InternetGW:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+              - '-'
+              - - !Ref Environment
+                - 'internet gateway'
+        - Key: Environment
+          Value: !Ref Environment
+  VPCIGAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref InternetGW
+      VpcId: !Ref KubeVpc
+  NATGW:
+    DependsOn: InternetGW
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatEip.AllocationId
+      SubnetId: !Ref PublicSubnet1
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+              - '-'
+              - - !Ref Environment
+                - 'nat gateway'
+        - Key: Environment
+          Value: !Ref Environment
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref KubeVpc
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+              - '-'
+              - - !Ref Environment
+                - 'public route table'
+        - Key: Environment
+          Value: !Ref Environment
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: InternetGW
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGW
+  PrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref KubeVpc
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+              - '-'
+              - - !Ref Environment
+                - 'private route table'
+        - Key: Environment
+          Value: !Ref Environment
+  PrivateRoute:
+    Type: AWS::EC2::Route
+    DependsOn: NATGW
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NATGW
+  PublicSubnetRouteTableAssociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet1
+      RouteTableId: !Ref PublicRouteTable
+  PublicSubnetRouteTableAssociation2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet2
+      RouteTableId: !Ref PublicRouteTable
+  PublicSubnetRouteTableAssociation3:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet3
+      RouteTableId: !Ref PublicRouteTable
+  PrivateSubnetRouteTableAssociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet1
+      RouteTableId: !Ref PrivateRouteTable
+  PrivateSubnetRouteTableAssociation2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet2
+      RouteTableId: !Ref PrivateRouteTable
+  PrivateSubnetRouteTableAssociation3:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet3
+      RouteTableId: !Ref PrivateRouteTable
+  BastionSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Bastion Security Group
+      VpcId: !Ref KubeVpc
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+  NodeLBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Node LB Security Group
+      VpcId: !Ref KubeVpc
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+  KubeSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Kube Security Group
+      SecurityGroupIngress:
+        -
+          IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          SourceSecurityGroupId: !Ref BastionSecurityGroup
+        -
+          IpProtocol: tcp
+          FromPort: 30000
+          ToPort:  65535
+          SourceSecurityGroupId: !Ref NodeLBSecurityGroup
+      VpcId: !Ref KubeVpc
+  KubeSecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      IpProtocol: tcp
+      FromPort: '0'
+      ToPort: '65535'
+      SourceSecurityGroupId: !Ref KubeSecurityGroup
+      GroupId: !Ref KubeSecurityGroup
+  # Lamdba function and associated roles to find out the latest AMI.
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: "/"
+      Policies:
+      - PolicyName: root
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - logs:*
+            - xray:*
+            - ec2:*
+            Resource: "*"
+  AMIIDLookup:
+   Type: "AWS::Lambda::Function"
+   Properties:
+     Handler: "amilookup.handler"
+     Role: !GetAtt LambdaExecutionRole.Arn
+     Code:
+       S3Bucket: !Ref S3Bucket
+       S3Key: !Ref S3Key
+     Runtime: "nodejs4.3"
+     Timeout: "25"
+     TracingConfig:
+       Mode: "Active"
+  AMIInfo:
+    Type: Custom::AMIInfo
+    Properties:
+      ServiceToken: !GetAtt AMIIDLookup.Arn
+      Region: !Ref "AWS::Region"
+      Architecture:
+        Fn::FindInMap:
+        - AWSInstanceType2Arch
+        - !Ref InstanceType
+        - Arch
+  # S3 Bucket role to be assigned to EC2 instances to communicate without keys.
+  S3BucketGetObjectRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - ec2.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: "/"
+      Policies:
+      - PolicyName: root
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - s3:Get*
+            Resource: "*"
+  S3BucketGetObjectInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: "/"
+      Roles:
+        - !Ref S3BucketGetObjectRole
+  # EC2 instances - Bastion, Kube master and nodes.
+  BastionEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !GetAtt AMIInfo.Id
+      KeyName: kubekey
+      SecurityGroupIds:
+        - !Ref BastionSecurityGroup
+      SubnetId: !Ref PublicSubnet3
+      InstanceType: !Ref InstanceType
+      IamInstanceProfile: !Ref S3BucketGetObjectInstanceProfile
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          aws s3 sync s3://${S3Bucket} /home/ec2-user
+  KubeMasterEC2Instance:
+    DependsOn: BastionEC2Instance
+    Type: AWS::EC2::Instance
+    Metadata:
+      AWS::CloudFormation::Init:
+        configSets:
+          InstallAndRun:
+            - filesdownload
+            - configure
+        filesdownload:
+          files:
+            '/home/ec2-user/kube-configure.sh':
+              source:
+                !Join
+                  - ''
+                  - - 'https://s3-'
+                    - !Ref AWS::Region
+                    - '.amazonaws.com/'
+                    - !Ref S3Bucket
+                    - '/master/kube-configure.sh'
+              mode: '000644'
+              owner: root
+              group: root
+            '/etc/cfn/cfn-hup.conf':
+              content: !Sub |
+                [main]
+                stack=${AWS::StackId}
+                region=${AWS::Region}
+                interval=1
+              mode: '000400'
+              owner: root
+              group: root
+            '/etc/cfn/hooks.d/cfn-auto-reloader.conf':
+              content: !Sub |
+                [cfn-auto-reloader-hook]
+                triggers=post.update
+                path=Resources.KubeMasterEC2Instance.Metadata.AWS::CloudFormation::Init
+                action=/opt/aws/bin/cfn-init --verbose --stack=${AWS::StackName} --region=${AWS::Region} --resource=KubeMasterEC2Instance --configsets=filesdownload,configure
+                runas=root
+        configure:
+          commands:
+            01_change_to_linux:
+              cwd: "/home/ec2-user"
+              command: !Sub |
+                sudo tr -d '\15\32' < kube-configure.sh > kube.sh
+            02_change_mode:
+              cwd: "home/ec2-user"
+              command: !Sub |
+                sudo chmod +x kube.sh
+            03_execute_script:
+              cwd: "/home/ec2-user"
+              command: !Sub |
+                export HOME=/home/ec2-user
+                sh kube.sh
+                chmod -R 755 .kube
+          services:
+            sysvinit:
+              cfn-hup:
+                enabled: true
+                ensureRunning: true
+                files:
+                  - /etc/cfn/cfn-hup.conf
+                  - /etc/cfn/hooks.d/cfn-auto-reloader.conf
+    Properties:
+      ImageId: !GetAtt AMIInfo.Id
+      KeyName: kubekey
+      SecurityGroupIds:
+        - !Ref KubeSecurityGroup
+      SubnetId: !Ref PrivateSubnet1
+      InstanceType: !Ref InstanceType
+      IamInstanceProfile: !Ref S3BucketGetObjectInstanceProfile
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash -xe
+          yum update -y aws-cfn-bootstrap
+          /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource KubeMasterEC2Instance --region ${AWS::Region} --configsets=InstallAndRun
+          /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource KubeMasterEC2Instance --region ${AWS::Region}
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+              - '-'
+              - - !Ref Environment
+                - 'Kube Master'
+        - Key: Environment
+          Value: !Ref Environment
+    CreationPolicy:
+      ResourceSignal:
+        Count: '1'
+        Timeout: PT25M
+  KubeNodeEC2Instance:
+    DependsOn:
+      - BastionEC2Instance
+      - KubeMasterEC2Instance
+    Type: AWS::EC2::Instance
+    Metadata:
+      AWS::CloudFormation::Init:
+        configSets:
+          InstallAndRun:
+            - filesdownload
+            - configure
+            - runcluster
+        filesdownload:
+          files:
+            '/home/ec2-user/kube-configure.sh':
+              source:
+                !Join
+                  - ''
+                  - - https://s3-
+                    - !Ref AWS::Region
+                    - .amazonaws.com/
+                    - !Ref S3Bucket
+                    - /nodes/kube-configure.sh
+              mode: '000644'
+              owner: root
+              group: root
+            '/home/ec2-user/kubekey':
+              source:
+                !Join
+                  - ''
+                  - - 'https://s3-'
+                    - !Ref AWS::Region
+                    - '.amazonaws.com/'
+                    - !Ref S3Bucket
+                    - '/kubekey'
+              mode: '000644'
+              owner: root
+              group: root
+            '/etc/cfn/cfn-hup.conf':
+              content: !Sub |
+                [main]
+                stack=${AWS::StackId}
+                region=${AWS::Region}
+                interval=1
+              mode: '000400'
+              owner: root
+              group: root
+            '/etc/cfn/hooks.d/cfn-auto-reloader.conf':
+              content: !Sub |
+                [cfn-auto-reloader-hook]
+                triggers=post.update
+                path=Resources.KubeNodeEC2Instance.Metadata.AWS::CloudFormation::Init
+                action=/opt/aws/bin/cfn-init --verbose --stack=${AWS::StackName} --region=${AWS::Region} --resource=KubeNodeEC2Instance --configsets=filesdownload,configure
+                runas=root
+        configure:
+          commands:
+            01_change_to_linux:
+              cwd: "/home/ec2-user"
+              command: !Sub |
+                sudo tr -d '\15\32' < kube-configure.sh > kube.sh
+            02_change_mode:
+              cwd: "home/ec2-user"
+              command: !Sub |
+                sudo chmod +x kube.sh
+            03_execute_script:
+              cwd: "/home/ec2-user"
+              command: !Sub |
+                export HOME=/home/ec2-user
+                sh kube.sh
+          services:
+            sysvinit:
+              cfn-hup:
+                enabled: true
+                ensureRunning: true
+                files:
+                  - /etc/cfn/cfn-hup.conf
+                  - /etc/cfn/hooks.d/cfn-auto-reloader.conf
+        runcluster:
+          commands:
+              01_change_permissions:
+                command: !Sub |
+                  sudo chmod 600 /home/ec2-user/kubekey
+              02_exec_command:
+                command:
+                  !Join
+                    - ''
+                    - - sudo `ssh -i /home/ec2-user/kubekey -o 'StrictHostKeyChecking no' ec2-user@
+                      - !GetAtt KubeMasterEC2Instance.PrivateIp
+                      - ' '
+                      - grep discovery-token-ca-cert-hash kubeadm-init.log`
+    Properties:
+      ImageId: !GetAtt AMIInfo.Id
+      KeyName: kubekey
+      SecurityGroupIds:
+        - !Ref KubeSecurityGroup
+      SubnetId: !Ref PrivateSubnet1
+      InstanceType: !Ref InstanceType
+      IamInstanceProfile: !Ref S3BucketGetObjectInstanceProfile
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash -xe
+          yum update -y aws-cfn-bootstrap
+          /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource KubeNodeEC2Instance --region ${AWS::Region} --configsets=InstallAndRun
+          /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource KubeNodeEC2Instance --region ${AWS::Region}
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+              - '-'
+              - - !Ref Environment
+                - 'Kube Node'
+        - Key: Environment
+          Value: !Ref Environment
+# Stack outputs.
+Outputs:
+  AIMID:
+    Description: "The Amazon EC2 instance AMI ID"
+    Value: !GetAtt AMIInfo.Id
+  BastionPublicIp:
+    Description: "Public IP of Bastion Instance"
+    Value: !GetAtt BastionEC2Instance.PublicIp
+  KubeMasterPrivateIp:
+    Description: "Private IP of Kube Master Instance"
+    Value: !GetAtt KubeMasterEC2Instance.PrivateIp
+  KubeNodePrivateIp:
+    Description: "Private IP of Kube Node Instance"
+    Value: !GetAtt KubeNodeEC2Instance.PrivateIp
