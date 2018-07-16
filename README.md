@@ -7,8 +7,6 @@ Mandatory Pre-requisites:
 
 - You should have aws cli installed on your system and configured to use access key and secret key for your user account. (Your user should have Full access to Cloudformation, access to S3 bucket and Lambda functions) Following this link if you don't have aws cli configured - https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html
 
-**** Please note, that this is based on assumption that your aws cli is configured to use ap-southeast-2 *******
-
 "Nice to haves":
 - I always use Atom editor with cloud formation yaml plug-in installed. It just suits me well. However you are welcome to use any editor of your choice.
 - git bash if you are on windows, makes it just tad easy to create your own infrastructure, following the documentation AS-IS.
@@ -19,7 +17,7 @@ Now lets get onto how you can run this for yourself -
 - Run environment.sh script from git bash (started within your root folder) and enter the name of the s3 bucket.
 
       sh environment.sh
-      
+
 - If you want to further change any other parameters, please do so manually in the parameters.json file under parameters folder.
 - Navigate to the folder aws-kube-cloudFormation/commands and open up commands.txt -- This file contains all the commands that you need to run to create your own cluster from ground up.
 
