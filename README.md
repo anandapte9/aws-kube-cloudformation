@@ -29,11 +29,17 @@ Now lets get onto how you can run this for yourself -
 - Run aws cli command to create the Bucket, upload the required files and set appropriate permissions.
 
     aws s3api create-bucket --bucket <BUCKET_NAME> --acl public-read --region ap-southeast-2 --create-bucket-configuration LocationConstraint=ap-southeast-2
+
     aws s3 sync files/ s3://<BUCKET_NAME>/
+
     aws s3api put-object --bucket <BUCKET_NAME> --key kubekey --body kubekey --region ap-southeast-2
+
     aws s3api put-object-acl --bucket <BUCKET_NAME> --key amilookup.zip --acl public-read
+
     aws s3api put-object-acl --bucket <BUCKET_NAME> --key master/kube-configure.sh --acl public-read
+
     aws s3api put-object-acl --bucket <BUCKET_NAME> --key nodes/kube-configure.sh --acl public-read
+
     aws s3api put-object-acl --bucket <BUCKET_NAME> --key kubekey --acl public-read
 
 - Run aws cli command to create the cloud formation stack.
