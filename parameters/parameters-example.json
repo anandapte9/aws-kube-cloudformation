@@ -25,7 +25,7 @@
   },
   {
     "ParameterKey": "S3Bucket",
-    "ParameterValue": "aa-cf-bucket"
+    "ParameterValue": "BUCKET_NAME"
   },
   {
     "ParameterKey": "S3Key",

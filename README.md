@@ -7,15 +7,22 @@ Mandatory Pre-requisites:
 
 - You should have aws cli installed on your system and configured to use access key and secret key for your user account. (Your user should have Full access to Cloudformation, access to S3 bucket and Lambda functions) Following this link if you don't have aws cli configured - https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html
 
+**** Please note, that this is based on assumption that your aws cli is configured to use ap-southeast-2 *******
+
 "Nice to haves":
 - I always use Atom editor with cloud formation yaml plug-in installed. It just suits me well. However you are welcome to use any editor of your choice.
 - git bash if you are on windows, makes it just tad easy to create your own infrastructure, following the documentation AS-IS.
 
 Now lets get onto how you can run this for yourself -
 
-- do a git clone of the repo. git clone https://github.com/anandapte9/aws-kube-cloudformation.git
-- Navigate to the folder aws-kube-cloudFormation/parameters and rename parameters.example.json to parameters.json. Change the parameters to suit your choice - definitely change the S3 bucket name (as the one in the example would already exist).
+- Do a git clone of the repo. git clone https://github.com/anandapte9/aws-kube-cloudformation.git
+- Run environment.sh script from git bash (started within your root folder) and enter the name of the s3 bucket.
+
+      sh environment.sh
+      
+- If you want to further change any other parameters, please do so manually in the parameters.json file under parameters folder.
 - Navigate to the folder aws-kube-cloudFormation/commands and open up commands.txt -- This file contains all the commands that you need to run to create your own cluster from ground up.
+
 - First of all create your ssh-keys.
 
       ssh-keygen -t rsa -C .
@@ -25,7 +32,6 @@ Now lets get onto how you can run this for yourself -
 
       aws ec2 import-key-pair --key-name kubekey --public-key-material file://kubekey.pub
 
-- Replace the <BUCKET_NAME> in the commands.txt with the name of the bucket that you have mentioned in parameters.json
 - Run aws cli command to create the Bucket, upload the required files and set appropriate permissions.
 
       aws s3api create-bucket --bucket <BUCKET_NAME> --acl public-read --region ap-southeast-2 --create-bucket-configuration LocationConstraint=ap-southeast-2
