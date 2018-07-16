@@ -5,7 +5,7 @@ This project presents YAML based cloudformation template to create a basic Kuber
 Mandatory Pre-requisites:
 - You must have a valid AWS account. (You can create an account if you don't have one here - https://aws.amazon.com/free/?sc_channel=PS&sc_campaign=acquisition_AU&sc_publisher=google&sc_medium=cloud_computing_b&sc_content=aws_generic_e&sc_detail=aws%20console&sc_category=cloud_computing&sc_segment=141366462134&sc_matchtype=e&sc_country=AU&s_kwcid=AL!4422!3!141366462134!e!!g!!aws%20console&ef_id=WzSKwgAAAKjTwgu9:20180715212230:s )
 
-- You should have aws cli installed on your system and configured to use access key and secret key for your account.
+- You should have aws cli installed on your system and configured to use access key and secret key for your user account. (Your user should have Full access to Cloudformation, access to S3 bucket and Lambda functions) Following this link if you don't have aws cli configured - https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html
 
 "Nice to haves":
 - I always use Atom editor with cloud formation yaml plug-in installed. It just suits me well. However you are welcome to use any editor of your choice.
