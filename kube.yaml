@@ -52,7 +52,9 @@ Resources:
   PublicSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: !Select [ 0, !Ref azones ]
+      AvailabilityZone: !Select
+        - 0
+        - Fn::GetAZs: !Ref AWS::Region
       CidrBlock: !Select [ 0, !Ref PublicSubnetCIDR ]
       MapPublicIpOnLaunch: True
       Tags:
@@ -68,7 +70,9 @@ Resources:
   PublicSubnet2:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: !Select [ 1, !Ref azones ]
+      AvailabilityZone: !Select
+        - 1
+        - Fn::GetAZs: !Ref AWS::Region
       CidrBlock: !Select [ 1, !Ref PublicSubnetCIDR ]
       MapPublicIpOnLaunch: True
       Tags:
@@ -84,7 +88,9 @@ Resources:
   PublicSubnet3:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: !Select [ 2, !Ref azones ]
+      AvailabilityZone: !Select
+        - 2
+        - Fn::GetAZs: !Ref AWS::Region
       CidrBlock: !Select [ 2, !Ref PublicSubnetCIDR ]
       MapPublicIpOnLaunch: True
       Tags:
@@ -100,7 +106,9 @@ Resources:
   PrivateSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: !Select [ 0, !Ref azones ]
+      AvailabilityZone: !Select
+        - 0
+        - Fn::GetAZs: !Ref AWS::Region
       CidrBlock: !Select [ 0, !Ref PrivateSubnetCIDR ]
       Tags:
         - Key: Name
@@ -115,7 +123,9 @@ Resources:
   PrivateSubnet2:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: !Select [ 1, !Ref azones ]
+      AvailabilityZone: !Select
+        - 1
+        - Fn::GetAZs: !Ref AWS::Region
       CidrBlock: !Select [ 1, !Ref PrivateSubnetCIDR ]
       Tags:
         - Key: Name
@@ -130,7 +140,9 @@ Resources:
   PrivateSubnet3:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: !Select [ 2, !Ref azones ]
+      AvailabilityZone: !Select
+        - 2
+        - Fn::GetAZs: !Ref AWS::Region
       CidrBlock: !Select [ 2, !Ref PrivateSubnetCIDR ]
       Tags:
         - Key: Name
