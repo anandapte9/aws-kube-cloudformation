@@ -36,6 +36,7 @@ aws cloudformation create-stack --stack-name test-kube-stack --template-body fil
 
 while aws cloudformation describe-stack --stack-name test-kube-stack | grep -m 1 "CREATE_COMPLETE"
 do
-sleep 60;
-aws cloudformation describe-stack --stack-name test-kube-stack;
+  sleep 60;
 done
+
+aws cloudformation describe-stack --stack-name test-kube-stack --query 'Stacks[0].Outputs[1].OutputValue --output text';
