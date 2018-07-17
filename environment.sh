@@ -34,9 +34,7 @@ aws s3api put-object-acl --bucket $BUCKET_NAME --key kubekey --acl public-read
 echo '---Creating cloudformation stack ---'
 aws cloudformation create-stack --stack-name test-kube-stack --template-body file://kube.yaml --parameters file://parameters/parameters.json --capabilities CAPABILITY_IAM
 
-while aws cloudformation describe-stack --stack-name test-kube-stack | grep -m 1 "CREATE_COMPLETE"
-do
-  sleep 60;
-done
+status="";
+while [ $status == "CREATE_COMPLETE"]; do status=`aws cloudformation describe-stacks --stack-name test-kube-stack --query 'Stacks[0].StackStatus'`; echo 'Still Creating the stack..'; sleep 10; done
 
-aws cloudformation describe-stack --stack-name test-kube-stack --query 'Stacks[0].Outputs[1].OutputValue --output text';
+aws cloudformation describe-stacks --stack-name test-kube-stack --query 'Stacks[0].Outputs[1].OutputValue --output text';

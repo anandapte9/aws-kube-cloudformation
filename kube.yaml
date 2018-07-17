@@ -598,10 +598,6 @@ Resources:
                 - 'Kube Node'
         - Key: Environment
           Value: !Ref Environment
-    CreationPolicy:
-      ResourceSignal:
-        Count: '1'
-        Timeout: PT25M
 # Stack outputs.
 Outputs:
   AIMID:
