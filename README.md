@@ -18,41 +18,17 @@ Now lets get onto how you can run this for yourself -
 
       sh environment.sh
 
-- If you want to further change any other parameters, please do so manually in the parameters.json file under parameters folder.
-- Navigate to the folder aws-kube-cloudFormation/commands and open up commands.txt -- This file contains all the commands that you need to run to create your own cluster from ground up.
+This is what the script does
 
-- First of all create your ssh-keys.
+- Creates your ssh-keys.
 
-      ssh-keygen -t rsa -C .
+- Imports the key to your AWS account.
 
-- Give your keyname as kubekey (if you don't want to change key name at a number of places).
-- Run aws cli command to import the key pair to your AWS account.
+- Creates Bucket and load appropriate files.
 
-      aws ec2 import-key-pair --key-name kubekey --public-key-material file://kubekey.pub
+- Runs aws cli command to create the cloud formation stack.
 
-- Run aws cli command to create the Bucket, upload the required files and set appropriate permissions.
-
-      aws s3api create-bucket --bucket <BUCKET_NAME> --acl public-read --region ap-southeast-2 --create-bucket-configuration LocationConstraint=ap-southeast-2
-
-      aws s3 sync files/ s3://<BUCKET_NAME>/
-
-      aws s3api put-object --bucket <BUCKET_NAME> --key kubekey --body kubekey --region ap-southeast-2
-
-      aws s3api put-object-acl --bucket <BUCKET_NAME> --key amilookup.zip --acl public-read
-
-      aws s3api put-object-acl --bucket <BUCKET_NAME> --key master/kube-configure.sh --acl public-read
-
-      aws s3api put-object-acl --bucket <BUCKET_NAME> --key nodes/kube-configure.sh --acl public-read
-
-      aws s3api put-object-acl --bucket <BUCKET_NAME> --key kubekey --acl public-read
-
-- Run aws cli command to create the cloud formation stack.
-
-      aws cloudformation create-stack --stack-name test-kube-stack --template-body file://kube.yaml --parameters file://parameters/parameters.json --capabilities CAPABILITY_IAM
-
-- Check the status of the stack (it should take about 10-15 mins to complete). You can also view the status from AWS cloudformation web console.
-
-      aws cloudformation describe-stacks --stack-name test-kube-stack
+- Checks the status of the stack (it should take about 10-15 mins to complete). You can also view the status from AWS cloudformation web console.
 
 - Once stack creation complete, get the bastion Public IP address from the outputs and login from git bash from the root folder.
 
