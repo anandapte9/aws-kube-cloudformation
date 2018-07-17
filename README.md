@@ -14,7 +14,7 @@ Mandatory Pre-requisites:
 Now lets get onto how you can run this for yourself -
 
 - Do a git clone of the repo. git clone https://github.com/anandapte9/aws-kube-cloudformation.git
-- Run environment.sh script from git bash (started within your root folder) and enter the name of the s3 bucket.
+- Run environment.sh script from git bash (started within your root folder), enter the name of the bucket and region.
 
       sh environment.sh
 
