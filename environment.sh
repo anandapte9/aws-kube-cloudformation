@@ -16,6 +16,7 @@ match=$(echo "${regions[@]:0}" | grep -o $REGION)
 [[ -z $match ]] && REGION="ap-southeast-2"
 
 sed 's/BUCKET_NAME/'$BUCKET_NAME'/g' parameters/parameters-example.json > parameters/parameters.json
+sed 's/BUCKET_NAME/'$BUCKET_NAME'/g' cleanup.sh > cleanup.sh
 
 echo '----- Generating ssh keys -----'
 ssh-keygen -t rsa -C . -f kubekey -N ''

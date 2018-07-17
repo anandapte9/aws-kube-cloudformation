@@ -43,3 +43,7 @@ This is what the script does
       kubectl get nodes (it should show two nodes - one set as master)
 
       kubectl get pods --all-namespaces (it should show all the system pods in the running status).
+
+- Cleanup the resources created after your verifcation by executing cleanup.sh.
+
+      sh cleanup.sh
