@@ -36,6 +36,15 @@ echo '---Creating cloudformation stack ---'
 aws cloudformation create-stack --stack-name test-kube-stack --template-body file://kube.yaml --parameters file://parameters/parameters.json --capabilities CAPABILITY_IAM
 
 status="";
-while [ $status == "CREATE_COMPLETE"]; do status=`aws cloudformation describe-stacks --stack-name test-kube-stack --query 'Stacks[0].StackStatus'`; echo 'Still Creating the stack..'; sleep 10; done
+check="ROLLBACK";
+while [ "$status" != "\"CREATE_COMPLETE\"" ];
+do
+   status=`aws cloudformation describe-stacks --stack-name test-kube-stack --query 'Stacks[0].StackStatus'`
+   if [[ $status =~ $check ]]; then echo 'Stack rolled back for some reason...!!!'; break; fi
+   echo 'Still Creating the stack..'
+   sleep 30
+done
 
-aws cloudformation describe-stacks --stack-name test-kube-stack --query 'Stacks[0].Outputs[1].OutputValue --output text';
+echo 'Stack created...'
+echo 'Here are the stack resources..'
+aws cloudformation describe-stacks --stack-name test-kube-stack --query 'Stacks[0].Outputs[1].OutputValue' --output json;
