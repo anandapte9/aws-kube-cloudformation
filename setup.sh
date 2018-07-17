@@ -47,4 +47,4 @@ done
 
 echo 'Stack created...'
 echo 'Here are the stack resources..'
-aws cloudformation describe-stacks --stack-name test-kube-stack --query 'Stacks[0].Outputs[1].OutputValue' --output json;
+aws cloudformation describe-stacks --stack-name test-kube-stack --query 'Stacks[0].Outputs' --output json;
