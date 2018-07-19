@@ -32,6 +32,8 @@ This is what the script does
 
 - Once stack creation complete, get the bastion Public IP address from the outputs and login from git bash from the root folder.
 
+*** if stack creation errors out for any reason (like permissions for your account) after fixing those run the cleanup.sh script before running setup.sh again ****
+
       ssh -i kubekey ec2-user@<BASTION_PUBLIC_IP_ADDRESS>
 
 - Login to master node from bastion host.
