@@ -5,7 +5,7 @@ regions="us-east-2 us-east-1 us-west-1 us-west-2 ap-northeast-1 ap-northeast-2 a
 echo '--- Testing aws cli configuration ---'
 awsclistatus="Unable to locate"
 status=`aws s3 ls s3://test-bucket/`
-if [[ $status =~ $ $awsclistatus ]]; then
+if [[ $status =~ $awsclistatus ]]; then
   echo 'ERROR: configure your aws cli first..'
 else
   echo '---- Setup Environment Variables ----'
