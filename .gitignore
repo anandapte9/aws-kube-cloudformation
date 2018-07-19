@@ -1,3 +1,4 @@
 /kubekey
 /kubekey.pub
 /parameters/parameters.json
+/cleanup.sh
