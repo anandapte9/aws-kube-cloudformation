@@ -1,5 +1,6 @@
 #!/usr/bin/env sh
 
+#Region names
 regions="us-east-2 us-east-1 us-west-1 us-west-2 ap-northeast-1 ap-northeast-2 ap-northeast-3 ap-south-1 ap-southeast-1 ap-southeast-2 ca-central-1 cn-north-1 cn-northwest-1 eu-central-1"
 
 echo '--- Testing aws cli configuration ---'
@@ -22,7 +23,7 @@ else
   [[ -z $match ]] && REGION="ap-southeast-2"
 
   sed 's/BUCKET_NAME/'$BUCKET_NAME'/g' parameters/parameters-example.json > parameters/parameters.json
-  sed 's/BUCKET_NAME/'$BUCKET_NAME'/g' cleanup.sh > cleanup.sh
+  sed 's/BUCKET_NAME/'$BUCKET_NAME'/g' cleanup-example.sh > cleanup.sh
 
   echo '----- Generating ssh keys -----'
   ssh-keygen -t rsa -C . -f kubekey -N ''
