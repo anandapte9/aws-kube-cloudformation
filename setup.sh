@@ -44,7 +44,7 @@ else
   status="";
   failure="ROLLBACK";
   success="COMPLETE"
-  while [ "$status" != "\"CREATE_COMPLETE\"" ];
+  while [ `echo $status | grep -c CREATE_COMPLETE` = 0 ];
   do
      status=`aws cloudformation describe-stacks --stack-name test-kube-stack --query 'Stacks[0].StackStatus'`
      if [[ $status =~ $failure ]]; then echo 'Stack rolled back for some reason...!!!'; break; fi
